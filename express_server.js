@@ -45,6 +45,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
+// Edit URL - takes you to url_show where you can edit. 
+app.post("/urls/:shortURL", (req,res) => {
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL] = req.body.longURL
+  res.redirect(`/urls/${shortURL}`);
+});
+
 //takes the new input and generates the new string code - redirects to home page
 app.post("/urls", (req,res) => {
   const shortURL = generateRandomString();
