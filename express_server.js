@@ -3,6 +3,9 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
+//added cookie parser
+const cookieParser = require('cookie-parser')
+
 //use body parser middleware before handlers; use req.body to access
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
