@@ -5,7 +5,7 @@ const PORT = 8080; // default port 8080
 
 //added cookie parser
 const cookieParser = require('cookie-parser')
-
+app.use(cookieParser());
 //use body parser middleware before handlers; use req.body to access
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
@@ -24,19 +24,34 @@ const urlDatabase = {
   "4fn9sf": "http://www.reddit.com"
 };
 
+//Login Page
+app.post('/login', (req, res) => {
+  const username = req.body.username
+  console.log (`${username} has signed into TinyApp`) //returns Adam
+  res.cookie('username', username).redirect('/urls')
+  //res.redirect('username','/urls')
+  //app.get('/', function(req, res){
+   //res.cookie('name', 'express').send('cookie set');
+   //const templateVars = {username: req.cookies["username"]}
+})
+
+
 // URL page 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  //console.log(templateVars)
   res.render("urls_index", templateVars);
 });
 
 //create a new URL page
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  //console.log('adam')
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"]};
   //console.log(templateVars)
   res.render("urls_show", templateVars);
 });
@@ -57,6 +72,7 @@ app.post("/urls/:shortURL", (req,res) => {
 
 //takes the new input and generates the new string code - redirects to home page
 app.post("/urls", (req,res) => {
+  //console.log('TEST')
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   //console.log(req.body);   returns { longURL: 'www.website.com' }
@@ -67,6 +83,11 @@ app.post("/urls", (req,res) => {
 app.get("/u/:shortURL", (req, res) => { //redirect to longURL page
   const longURL = urlDatabase[req.params.shortURL]
   res.redirect(longURL);
+});
+
+app.post('/logout', (req, res) => {
+  const username = req.body.username
+  res.clearCookie('username', username).redirect('/urls')
 });
 
 app.listen(PORT, () => {
