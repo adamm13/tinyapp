@@ -4,6 +4,8 @@ const PORT = 8080; // default port 8080
 const cookieParser = require('cookie-parser') //added cookie parser
 const bodyParser = require("body-parser"); //use body parser middleware before handlers; use req.body to access
 const { findUserByEmail, findUrlsByUserID } = require('./helpers');
+const bcrypt = require('bcryptjs');
+const saltRounds = 10;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -24,19 +26,20 @@ const users = { //users Database
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync('test', saltRounds),
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync('test', saltRounds),
   },
   "adamm13": {
     id: "adamm13",
     email: "13.adamm@gmail.com",
-    password: "adam"
+    password: bcrypt.hashSync('adam', saltRounds),
   }
 }
+console.log(users)
 
 app.get("/urls", (req, res) => { // URL page 
   let userID = req.cookies["user_id"];
@@ -95,10 +98,10 @@ app.post('/register', (req, res) => {
   const newUser = {
     id: id,
     email: email,
-    password: password
+    password: bcrypt.hashSync(password, saltRounds),
   };
   users[id] = newUser;
-  //console.log(users)
+  console.log(users)
   res.cookie('user_id', id).redirect('/urls')
 })
 
@@ -108,26 +111,33 @@ app.post('/register', (req, res) => {
 //  return currentUser
 //}
 
-app.post('/login', (req, res) => { //Login Page
+app.post('/login', (req, res) => { // LOGIN POST <-- Checking if user password matches/ sends errors if no email/ password
   const email = req.body.email;
   const password = req.body.password;
   let user = findUserByEmail(email, users)
+  
+
+  if (user && bcrypt.compareSync(password, user.password)) {
+    res.cookie('user_id', user.id).redirect('/urls')
+  }
+
   if (!user) {
     let templateVars = {
       status: 403,
       message: 'This Email Cannot be Found',
+      user: null
     }
-    res.redirect('/urls', templateVars)
+    res.render('urls_errors', templateVars)
   }
+
   if (user.password !== password) {
     let templateVars = {
       status: 403,
-      message: 'Your Password is Incorrect'
+      message: 'Your Password is Incorrect',
+      user: null,
     }
-    res.redirect('/urls', templateVars)
+    res.render('urls_errors', templateVars)
   }
-
-  res.cookie('user_id', user.id).redirect('/urls')
 });
 
 app.get("/urls/:shortURL", (req, res) => { // Edit URL - takes you to the urls_show template where you can edit
