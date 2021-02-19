@@ -2,10 +2,12 @@ const express = require("express"); //require express
 const cookieSession = require('cookie-session'); // require cookieSession
 const bodyParser = require("body-parser"); //use body parser middleware before handlers; use req.body to access
 const { findUserByEmail, findUrlsByUserID, generateRandomString } = require('./helpers');
+const { urlDatabase, users } = require('./databases/databases');
 const app = express();
 const PORT = 8080;  // deafult PORT 8080
 const bcrypt = require('bcryptjs'); // use bcrypt to hash passwords
 const saltRounds = 10;
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs'); //set view engine to ejs
@@ -14,29 +16,6 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1','key2']
 }));
-
-const urlDatabase = { //practice Database
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
-};
-
-const users = { //users Database
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: bcrypt.hashSync('test', saltRounds),
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: bcrypt.hashSync('test', saltRounds),
-  },
-  "adamm13": {
-    id: "adamm13",
-    email: "13.adamm@gmail.com",
-    password: bcrypt.hashSync('adam', saltRounds),
-  }
-};
 
 app.get("/urls", (req, res) => { // URL homepage index if user logged in; if not redirect to login
   const userID = req.session["user_id"];
