@@ -157,6 +157,9 @@ app.post('/login', (req, res) => { // LOGIN POST <-- Checking if user password m
 app.get("/urls/:shortURL", (req, res) => { // Edit URL - takes you to the urls_show template where you can edit
   //console.log('adam')
   let userID = req.session["user_id"]
+  if (!userID) {
+    res.redirect("/login");
+  } else {
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
@@ -164,6 +167,7 @@ app.get("/urls/:shortURL", (req, res) => { // Edit URL - takes you to the urls_s
   };
   //console.log(templateVars)
   res.render("urls_show", templateVars);
+}
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => { // Delete URL
