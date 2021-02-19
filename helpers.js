@@ -1,21 +1,20 @@
+const generateRandomString = function() { //function to generate random string
+  let length = 6;
+  return Math.random().toString(20).substr(2, length);
+};
 
-const findUserByEmail = (email, users) => {
+const findUserByEmail = (email, users) => { // function to find user by their email in the users database
   return Object.values(users).find(user => user.email === email);
 };
 
-const findUrlsByUserID = (urls, id) => {
+const findUrlsByUserID = (urls, id) => { // find the urls that match the persons id
   let usersUrls = {};
   for (let url in urls) {
-    //console.log('pre condition:', urls[url]);
-    //console.log('pre condition:', urls[url].userID);
     if (urls[url].userID === id) {
-      //console.log('POST condition', id);
-      //console.log('POST condition', urls[url]);
-      //console.log('POST condition', urls[url].userID);
       usersUrls[url] = urls[url];
     }
   }
   return usersUrls;
-}
+};
 
-module.exports = { findUserByEmail, findUrlsByUserID  }
+module.exports = { findUserByEmail, findUrlsByUserID, generateRandomString  };
