@@ -17,6 +17,16 @@ app.use(cookieSession({
   keys: ['key1','key2']
 }));
 
+app.get("/", (req, res) => { // If user goes to domain "/" it will redirect to login if no user is signed in. if logged in redirect
+  const userID = req.session["user_id"];
+  if (!userID) {
+    res.redirect('/login');
+  } else {
+    const templateVars = { user: users[userID], urls: findUrlsByUserID(urlDatabase, userID) };
+    res.render("urls_index", templateVars);
+  }
+});
+
 app.get("/urls", (req, res) => { // URL homepage index if user logged in; if not redirect to login
   const userID = req.session["user_id"];
   if (!userID) {
@@ -125,6 +135,14 @@ app.get("/urls/:shortURL", (req, res) => { // Edit URL - takes you to the urls_s
 
   if (!userID) { // if no user redirect to login
     res.redirect("/login");
+  } else if (userID !== urlDatabase[req.params.shortURL].userID) { //if the short URL does not belong to the logged in user
+    const templateVars = {
+      status: 401,
+      message: 'You are not allowed to Edit that URL',
+      user: users[req.session.user_id]
+    };
+    res.status(401);
+    res.render("urls_errors", templateVars);
   } else { // show the user the edit page with the info form their database
     const templateVars = {
       shortURL: req.params.shortURL,
@@ -167,7 +185,7 @@ app.get("/u/:shortURL", (req, res) => { //shows your individual link and its sho
 });
 
 app.post('/logout', (req, res) => { // Logout
-  req.session['user_id'] = null; // end session/ clear cookie
+  req.session = null; // end session/ clear cookie
   res.redirect('/urls'); //redirect home
 });
 
